@@ -6,13 +6,17 @@ A React implementation demonstrating how to create a wrapper component for the A
 
 This example shows how to integrate the Accend Link SDK into a React application using a custom wrapper component. The wrapper handles SDK initialization, lifecycle management, and provides a clean React API for configuration and event handling.
 
+This README will include instructions on how to run the example, as well as context for how this SDK works.
+
 ## Prerequisites
 
 - Node.js 16+ installed
 - React 18+ application
-- A valid customer access token from your Accend Link backend integration
+- A valid customer access token from your Accend Link backend integration (and a way to ensure that you have a latest refreshed token)
 
-## Running This Example
+## Running the Example
+
+You can run the example to see what it can do, but this repo is intended to serve as an example for how you might integrate it into your own app.
 
 ### 1. Install Dependencies
 
@@ -40,19 +44,30 @@ npm start
 
 The application will be available at `http://localhost:1234`.
 
-### 4. Alternative Quick Start
+## Integration
 
-Use the provided script:
+Below you can find information on how to integrate this into your own stack, and more context on how this works.
 
-```bash
-./run-demo.sh
-```
+### The `@accend/link-types` library
 
-## Implementation
+At its center, the `@accend/link-types` library is the core of this implementation. This package provides the `initializeAccendLink` function that handles the integration with the Accend Link SDK, along with comprehensive TypeScript support for configuration objects and callback functions.
+
+Behind the scenes, `@accend/link-types` dynamically loads the front-end Accend Link JavaScript SDK, ensuring your application only downloads the SDK when it's actually needed. This approach keeps your initial bundle size small while providing seamless integration.
+
+To integrate this into your React application, you'll need to create a wrapper component (like the `AccendLink` component in this example) within your own React app. This wrapper ensures the SDK is properly initialized within React's component lifecycle and provides a clean, React-friendly API for configuration and event handling.
 
 ### AccendLink Component
 
-The core wrapper component that integrates the SDK with React:
+The `AccendLink` component is a React wrapper that handles the initialization and lifecycle of the Accend Link SDK. Here's how it works:
+
+**Key Features:**
+
+- Automatically initializes the SDK when the component mounts
+- Handles proper cleanup and lifecycle management
+- Provides a clean React API for configuration and callbacks
+- Uses refs to ensure the SDK targets the correct DOM element to load content into
+
+**Implementation Example:**
 
 ```tsx
 // src/AccendLink.tsx
@@ -78,10 +93,11 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
 
   return (
     <div
-      style={{
-        width: "100%",
-        maxHeight: "95%",
-      }}
+      style={
+        {
+          // as an example, you can style this however you see fit.
+        }
+      }
       ref={setComponentMount}
     />
   );
@@ -90,7 +106,11 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
 export default AccendLink;
 ```
 
-### Using the Component
+### Example: Using the Component
+
+Once you have the AccendLink component, you can use it in your React application.
+
+As an example, you could load it and display it on a page, just like this:
 
 ```tsx
 import AccendLink from "./AccendLink";
@@ -118,9 +138,9 @@ const handleError = (error?: Error) => {
 <AccendLink config={config} onSuccess={handleSuccess} onFail={handleError} />;
 ```
 
-### Modal Integration
+### Example: Modal Integration
 
-For modal implementations, use conditional rendering to ensure fresh component mounting:
+You can also use it as a modal, for example, with the MUI modal as featured in this example app.
 
 ```tsx
 const [modalOpen, setModalOpen] = useState(false);
@@ -143,13 +163,17 @@ return (
 
 ## Authentication
 
+Authentication is managed through customer access tokens that are generated server-side using your Accend Link backend integration. These tokens provide secure access to the Accend Link SDK and must be obtained through your backend API.
+
+Customer Access tokens will generally have an expiration date, and should be refreshed via the Accend API. You can find the [staging API here](https://api.staging.withaccend.com/redoc)
+
+**Important Security Note:** Customer access tokens should never be hardcoded in client-side code. Always fetch them dynamically from your secure backend API.
+
 ### Customer Access Tokens
 
 Customer access tokens must be generated server-side using your Accend Link backend integration.
 
-**Important:** Never generate customer access tokens on the client side, as this would expose your API credentials.
-
-### Token Generation Steps
+### Example: Token Generation Steps
 
 1. Set up server-side token generation using your backend integration
 2. Create an API endpoint to generate tokens for authenticated users
@@ -158,12 +182,15 @@ Customer access tokens must be generated server-side using your Accend Link back
 
 ## Configuration Reference
 
+The AccendConfig object allows you to customize various aspects of the Accend Link SDK. While currently focused on authentication, future versions will include theming options and additional customization features.
+
+### Basic Configuration
+
 ### AccendConfig Interface
 
 | Property                   | Type   | Required | Description                                   |
 | -------------------------- | ------ | -------- | --------------------------------------------- |
 | `data.customerAccessToken` | string | ✓        | Authentication token for the customer session |
-| `component.theme.primary`  | string | ✗        | Primary color theme                           |
 
 ### AccendLink Component Props
 
@@ -195,59 +222,6 @@ import {
 
 The package provides complete TypeScript definitions for all configuration options and callback functions.
 
-## Implementation Notes
-
-### Component Lifecycle
-
-- The AccendLink component initializes the SDK only once when first mounted
-- Props cannot be changed after initialization - unmount and remount for new configurations
-- The component automatically handles cleanup when unmounted
-- For modal scenarios, use conditional rendering to ensure fresh mounting
-
-### Best Practices
-
-1. **Token Security**: Always generate tokens server-side
-2. **Error Handling**: Implement both `onSuccess` and `onFail` callbacks
-3. **Modal Integration**: Use conditional rendering for modal implementations
-4. **Component Sizing**: Set appropriate container dimensions for your layout
-
-## Integration Examples
-
-### Basic Integration
-
-```tsx
-function MyComponent() {
-  return (
-    <div style={{ width: "600px", height: "400px" }}>
-      <AccendLink config={config} />
-    </div>
-  );
-}
-```
-
-### With State Management
-
-```tsx
-function DocumentUpload() {
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  return (
-    <AccendLink
-      config={config}
-      onSuccess={() => {
-        setUploading(false);
-        setError(null);
-      }}
-      onFail={(error) => {
-        setUploading(false);
-        setError(error?.message || "Upload failed");
-      }}
-    />
-  );
-}
-```
-
 ## File Structure
 
 ```
@@ -257,20 +231,6 @@ src/
 └── index.tsx                # Application entry point
 ```
 
-## Dependencies
+## Questions
 
-```json
-{
-  "@accend/link-types": "latest",
-  "react": "^18.x.x",
-  "react-dom": "^18.x.x"
-}
-```
-
-## Next Steps
-
-1. Replace the demo customer access token with your actual token
-2. Implement server-side token generation
-3. Integrate the component into your application's modal or page layout
-4. Add appropriate error handling and user feedback
-5. Style the container to match your application design
+Please contact the Accend team through Slack with any questions!

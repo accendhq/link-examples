@@ -299,7 +299,7 @@ export default function Home() {
                   fontFamily: "monospace",
                 }}
               >
-                "use client"
+                &quot;use client&quot;
               </code>{" "}
               directive since the AccendLink component uses React hooks and DOM
               interactions.

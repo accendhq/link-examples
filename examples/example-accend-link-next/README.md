@@ -1,20 +1,22 @@
 # Accend Link Next.js Integration Example
 
-A Next.js implementation of the Accend Link SDK demonstrating the critical webpack configuration required for Next.js applications.
+A Next.js implementation demonstrating how to integrate the Accend Link SDK with the critical webpack configuration required for Next.js applications.
 
 ## Overview
 
-This example shows how to integrate the Accend Link SDK into a Next.js application. The key difference from standard React implementations is the requirement for webpack magic comments to handle external script loading.
+This example shows how to integrate the Accend Link SDK into a Next.js application. The key difference from standard React implementations is the requirement for webpack magic comments to handle external script loading. This example provides a production-ready implementation that showcases the unique considerations required for Next.js applications.
 
-**⚠️ Critical Requirement:** Next.js requires the `/* webpackIgnore: true */` magic comment to prevent webpack from parsing the external SDK during build.
+This README will include instructions on how to run the example, as well as context for how this SDK works specifically within Next.js environments.
 
 ## Prerequisites
 
 - Node.js 18+ installed
 - Next.js 13+ with App Router
-- A valid customer access token from your Accend Link backend integration
+- A valid customer access token from your Accend Link backend integration (and a way to ensure that you have a latest refreshed token)
 
-## Running This Example
+## Running the Example
+
+You can run the example to see what it can do, but this repo is intended to serve as an example for how you might integrate it into your own Next.js app.
 
 ### 1. Install Dependencies
 
@@ -27,7 +29,7 @@ npm install
 Replace the test token in `src/app/page.tsx` with your actual customer access token:
 
 ```tsx
-const config = {
+const accendConfig = {
   data: {
     customerAccessToken: "your-actual-customer-access-token",
   },
@@ -49,33 +51,35 @@ npm run build
 npm start
 ```
 
-## Implementation
+## Integration
 
-### AccendLink Component
+Below you can find information on how to integrate this into your own Next.js stack, and more context on how this works.
 
-The core component that wraps the Accend Link SDK for Next.js:
+### Critical Next.js Requirement
+
+**⚠️ The `/* webpackIgnore: true */` magic comment is absolutely critical for Next.js applications.** Unlike other React implementations, Next.js requires this comment to prevent webpack from attempting to parse the external Accend Link SDK during build time.
+
+Without this magic comment, your Next.js build will fail because webpack will try to bundle the external SDK, which is designed to be loaded at runtime.
+
+### AccendLink Component for Next.js
+
+The `AccendLink` component for Next.js is specifically designed to handle the unique requirements of Next.js applications. Here's how it works:
+
+**Key Features:**
+
+- Uses the critical webpack magic comment for build compatibility
+- Handles dynamic SDK loading at runtime
+- Manages error states and loading feedback
+- Integrates with Next.js client component architecture
+- Provides comprehensive error handling for network issues
+
+**Implementation Example:**
 
 ```tsx
 // src/components/AccendLink.tsx
 import { LINK_SDK_STAGING_URL } from "@/utils/constants";
+import { logError, LogType } from "@/utils/logger";
 import React, { useEffect, useState, useRef } from "react";
-
-interface AccendConfig {
-  data: {
-    customerAccessToken: string;
-  };
-  component?: {
-    theme?: {
-      primary?: string;
-    };
-  };
-}
-
-interface AccendLinkProps {
-  config: AccendConfig;
-  onSuccess?: () => void;
-  onFail?: (error?: Error) => void;
-}
 
 const AccendLink: React.FC<AccendLinkProps> = (props) => {
   const [componentMount, setComponentMount] = useState<HTMLDivElement | null>(
@@ -106,7 +110,11 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
 export default AccendLink;
 ```
 
-### Using the Component
+### Example: Using the Component
+
+Once you have the AccendLink component, you can use it in your Next.js application. Remember that any page or component using AccendLink must be a client component.
+
+As an example, you could load it and display it in a modal, just like this:
 
 ```tsx
 // src/app/page.tsx
@@ -121,7 +129,7 @@ export default function Home() {
     },
     component: {
       theme: {
-        primary: "#123413",
+        primary: "#2196f3",
       },
     },
   };
@@ -144,24 +152,57 @@ export default function Home() {
 }
 ```
 
+### Example: Modal Integration
+
+You can also use it as a modal within your Next.js application. The example shows how to implement a custom modal with proper state management:
+
+```tsx
+const [open, setOpen] = useState(false);
+
+return (
+  <>
+    <button onClick={() => setOpen(true)}>Connect Accounts</button>
+
+    {open && (
+      <div className="modal-overlay">
+        <div className="modal">
+          <AccendLink
+            config={config}
+            onSuccess={() => {
+              handleSuccess();
+              setOpen(false);
+            }}
+            onFail={handleError}
+          />
+        </div>
+      </div>
+    )}
+  </>
+);
+```
+
 ## SDK Environment Configuration
 
 ### Available Environments
 
+The Accend Link SDK is available in two environments that you can choose from based on your development needs:
+
 ```tsx
-// src/utils/constants.ts
-export const LINK_SDK_URL = "https://static.withaccend.com/sdk/v1/link.min.js";
-export const LINK_SDK_STAGING_URL =
+// Production SDK - for live applications
+const LINK_SDK_URL = "https://static.withaccend.com/sdk/v1/link.min.js";
+
+// Staging SDK - for development and testing
+const LINK_SDK_STAGING_URL =
   "https://static.withaccend.com/sdk/staging/link.min.js";
 ```
 
 ### Environment Selection
 
 ```tsx
-// Development/testing (default in this example)
+// Use staging for development (default in this example)
 const baseUrl = LINK_SDK_STAGING_URL;
 
-// Production
+// Use production for live applications
 const baseUrl = LINK_SDK_URL;
 
 // Environment-based switching
@@ -169,21 +210,13 @@ const baseUrl =
   process.env.NODE_ENV === "production" ? LINK_SDK_URL : LINK_SDK_STAGING_URL;
 ```
 
-### Using Environment Variables
-
-Create a `.env.local` file:
-
-```bash
-NEXT_PUBLIC_ACCEND_SDK_URL=https://static.withaccend.com/sdk/staging/link.min.js
-```
-
-Then in your component:
-
-```tsx
-const baseUrl = process.env.NEXT_PUBLIC_ACCEND_SDK_URL || LINK_SDK_STAGING_URL;
-```
-
 ## Authentication
+
+Authentication is managed through customer access tokens that are generated server-side using your Accend Link backend integration. These tokens provide secure access to the Accend Link SDK and must be obtained through your backend API.
+
+Customer Access tokens will generally have an expiration date, and should be refreshed via the Accend API. You can find the [staging API here](https://api.staging.withaccend.com/redoc)
+
+**Important Security Note:** Customer access tokens should never be hardcoded in client-side code. Always fetch them dynamically from your secure backend API.
 
 ### Customer Access Tokens
 
@@ -201,19 +234,18 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-### Fetching Tokens in Components
+### Example: Token Generation Steps
 
-```tsx
-const [token, setToken] = useState<string>("");
-
-useEffect(() => {
-  fetch("/api/accend-token", { method: "POST" })
-    .then((res) => res.json())
-    .then((data) => setToken(data.customerAccessToken));
-}, []);
-```
+1. Set up server-side token generation using your backend integration
+2. Create a Next.js API route to generate tokens for authenticated users
+3. Fetch tokens in your React components as needed
+4. Pass tokens to the AccendLink component via the config prop
 
 ## Configuration Reference
+
+The AccendConfig object allows you to customize various aspects of the Accend Link SDK. While currently focused on authentication, future versions will include theming options and additional customization features.
+
+### Basic Configuration
 
 ### AccendConfig Interface
 
@@ -234,7 +266,7 @@ useEffect(() => {
 
 ### 1. Client Component Directive
 
-All pages/components using AccendLink must include the `"use client"` directive:
+All pages/components using AccendLink must include the `"use client"` directive because the AccendLink component uses React hooks and DOM interactions:
 
 ```tsx
 "use client";
@@ -244,13 +276,11 @@ import AccendLink from "@/components/AccendLink";
 
 ### 2. Webpack Magic Comment
 
-The dynamic import must include `/* webpackIgnore: true */`:
+The dynamic import must include `/* webpackIgnore: true */` to prevent webpack from attempting to bundle the external SDK at build time:
 
 ```tsx
 import(/* webpackIgnore: true */ baseUrl);
 ```
-
-This prevents webpack from attempting to bundle the external SDK at build time.
 
 ### 3. Runtime Script Loading
 
@@ -278,21 +308,6 @@ src/
     └── logger.ts             # Error logging utilities
 ```
 
-## Dependencies
+## Questions
 
-```json
-{
-  "next": "15.4.5",
-  "react": "19.1.0",
-  "react-dom": "19.1.0",
-  "typescript": "^5"
-}
-```
-
-## Next Steps
-
-1. Replace the demo customer access token with your actual token
-2. Implement server-side token generation
-3. Configure environment-specific SDK URLs
-4. Add error handling and logging as needed
-5. Style the component to match your application design
+Please contact the Accend team through Slack with any questions!
