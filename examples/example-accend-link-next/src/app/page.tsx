@@ -49,11 +49,6 @@ export default function Home() {
       // This is a test token, and will not work in production.
       customerAccessToken: "cust_token_34ec7549-e874-4a57-9661-e444c2db453a",
     },
-    component: {
-      theme: {
-        primary: "#2196f3",
-      },
-    },
   };
 
   const styles = {
