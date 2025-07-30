@@ -1,0 +1,11 @@
+{
+  "name": "@accend/link-vanilla-js-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "http-server -o"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
