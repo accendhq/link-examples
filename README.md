@@ -23,6 +23,5 @@ Each example includes:
 - Complete implementation with working demo
 - Step-by-step setup instructions
 - Configuration reference and API documentation
-- `run-demo.sh` script for quick testing
 
 Choose the example that matches your technology stack and follow the README in each directory for detailed implementation guidance.
