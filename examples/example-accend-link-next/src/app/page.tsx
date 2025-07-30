@@ -46,7 +46,8 @@ export default function Home() {
     data: {
       // This customer access token should be replaced with the actual customer access token
       // you get from the Accend Link SDK API (likely through your own backend calls.)
-      customerAccessToken: "cust_token_34ec7549-e874-4a57-9661-e444c2db453f",
+      // This is a test token, and will not work in production.
+      customerAccessToken: "cust_token_34ec7549-e874-4a57-9661-e444c2db453a",
     },
     component: {
       theme: {
