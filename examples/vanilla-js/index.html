@@ -96,6 +96,16 @@
         margin: 16px 0;
       }
 
+      .loading-box {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+        border-radius: 4px;
+        padding: 16px;
+        margin: 16px 0;
+        text-align: center;
+      }
+
       .hidden {
         display: none;
       }
@@ -105,21 +115,22 @@
         max-width: 600px;
         height: 620px;
         margin: 20px auto;
-        border: 2px dashed #ddd;
         border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #fafafa;
-      }
-
-      #accend-link-container.initialized {
-        border: none;
-        background: transparent;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       .placeholder-text {
         color: #666;
+        text-align: center;
+        font-style: italic;
+      }
+
+      .loading-text {
+        color: #1565c0;
         text-align: center;
         font-style: italic;
       }
@@ -153,23 +164,23 @@
       <div class="description">
         <p>
           This example demonstrates how to integrate the Accend Link SDK with
-          vanilla JavaScript. The SDK is loaded dynamically from the CDN and
-          initialized with a target DOM element.
+          vanilla JavaScript. The SDK is automatically loaded and initialized
+          when the page loads.
         </p>
       </div>
 
       <div class="info-box">
-        <strong>Note:</strong> Make sure to replace the demo customer access
-        token with your actual token in a production environment.
+        <strong>Note:</strong> This demo automatically initializes AccendLink
+        with a demo customer access token. Replace with your actual token in a
+        production environment.
       </div>
 
       <div class="demo-section">
-        <h2>Interactive Demo</h2>
+        <h2>Live Demo</h2>
 
-        <div class="button-group">
-          <button id="initialize-button">Initialize AccendLink</button>
-          <button id="open-button" disabled>Open Modal</button>
-          <button id="close-button" disabled>Close Modal</button>
+        <div id="loading-message" class="loading-box">
+          <strong>Loading AccendLink SDK...</strong><br />
+          Please wait while we initialize the connection.
         </div>
 
         <div
@@ -186,9 +197,9 @@
         </div>
 
         <div id="accend-link-container">
-          <div class="placeholder-text">
-            AccendLink will be initialized here.<br />
-            Click "Initialize AccendLink" to start.
+          <div class="loading-text">
+            Loading AccendLink...<br />
+            This may take a few moments.
           </div>
         </div>
       </div>
@@ -196,37 +207,41 @@
       <div class="demo-section">
         <h2>Implementation Example</h2>
 
-        <div class="code-title">Basic Implementation:</div>
+        <div class="code-title">Auto-Initialize Implementation:</div>
         <pre><code>// 1. Define SDK URLs
 const LINK_SDK_URL = "https://static.withaccend.com/sdk/v1/link.min.js";
 const LINK_SDK_STAGING_URL = "https://static.withaccend.com/sdk/staging/link.min.js";
 
-// 2. Get container element
-const container = document.getElementById('accend-link-container');
-
-// 3. Load and initialize SDK
-const module = await import(LINK_SDK_STAGING_URL);
-const instance = new module.AccendLink({
-  target: container,
-  props: {
-    config: {
-      data: {
-        customerAccessToken: "your-customer-access-token"
-      },
-      component: {
-        theme: {
-          primary: "#2196f3"
-        }
+// 2. Auto-initialize on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  const container = document.getElementById('accend-link-container');
+  
+  try {
+    // Load SDK
+    const module = await import(LINK_SDK_STAGING_URL);
+    
+    // Initialize immediately
+    const instance = new module.AccendLink({
+      target: container,
+      props: {
+        config: {
+          data: {
+            customerAccessToken: "your-customer-access-token"
+          },
+          component: {
+            theme: {
+              primary: "#2196f3"
+            }
+          }
+        },
+        onSuccess: () => console.log("Success!"),
+        onFail: (error) => console.error("Error:", error)
       }
-    },
-    onSuccess: () => console.log("Success!"),
-    onFail: (error) => console.error("Error:", error)
+    });
+  } catch (error) {
+    console.error("Failed to load AccendLink:", error);
   }
-});
-
-// 4. Control the SDK
-instance.open();  // Open the interface
-instance.close(); // Close the interface</code></pre>
+});</code></pre>
 
         <div class="code-title">Configuration Options:</div>
         <pre><code>const config = {
@@ -250,9 +265,7 @@ instance.close(); // Close the interface</code></pre>
 
       // Get references to DOM elements
       const container = document.getElementById("accend-link-container");
-      const initializeButton = document.getElementById("initialize-button");
-      const openButton = document.getElementById("open-button");
-      const closeButton = document.getElementById("close-button");
+      const loadingMessage = document.getElementById("loading-message");
       const successMessage = document.getElementById("success-message");
       const errorMessage = document.getElementById("error-message");
       const errorText = document.getElementById("error-text");
@@ -264,25 +277,26 @@ instance.close(); // Close the interface</code></pre>
       function showSuccessMessage() {
         successMessage.classList.remove("hidden");
         errorMessage.classList.add("hidden");
+        loadingMessage.classList.add("hidden");
       }
 
       function showErrorMessage(error) {
         errorText.textContent = error?.message || String(error);
         errorMessage.classList.remove("hidden");
         successMessage.classList.add("hidden");
+        loadingMessage.classList.add("hidden");
       }
 
       function hideMessages() {
         successMessage.classList.add("hidden");
         errorMessage.classList.add("hidden");
+        loadingMessage.classList.add("hidden");
       }
 
-      // Initialize AccendLink
-      initializeButton.addEventListener("click", async () => {
+      // Auto-initialize AccendLink when page loads
+      document.addEventListener("DOMContentLoaded", async () => {
         try {
-          hideMessages();
-          initializeButton.disabled = true;
-          initializeButton.textContent = "Initializing...";
+          console.log("Auto-initializing AccendLink...");
 
           // Use staging URL for demo - change to LINK_SDK_URL for production
           const baseUrl = LINK_SDK_STAGING_URL;
@@ -294,9 +308,8 @@ instance.close(); // Close the interface</code></pre>
             throw new Error("AccendLink class not found in SDK module");
           }
 
-          // Clear container placeholder
+          // Clear container loading text
           container.innerHTML = "";
-          container.classList.add("initialized");
 
           // Initialize AccendLink instance
           accendLinkInstance = new module.AccendLink({
@@ -325,42 +338,21 @@ instance.close(); // Close the interface</code></pre>
             },
           });
 
-          // Enable control buttons
-          openButton.disabled = false;
-          closeButton.disabled = false;
-          initializeButton.textContent = "Initialized ✓";
+          // Hide loading message once initialized
+          hideMessages();
 
           console.log("AccendLink initialized successfully");
         } catch (error) {
           console.error("Error initializing AccendLink:", error);
           showErrorMessage(error);
-          initializeButton.disabled = false;
-          initializeButton.textContent = "Initialize AccendLink";
-        }
-      });
 
-      // Open AccendLink modal
-      openButton.addEventListener("click", () => {
-        if (accendLinkInstance) {
-          hideMessages();
-          try {
-            accendLinkInstance.open();
-          } catch (error) {
-            console.error("Error opening AccendLink:", error);
-            showErrorMessage(error);
-          }
-        }
-      });
-
-      // Close AccendLink modal
-      closeButton.addEventListener("click", () => {
-        if (accendLinkInstance) {
-          try {
-            accendLinkInstance.close();
-          } catch (error) {
-            console.error("Error closing AccendLink:", error);
-            showErrorMessage(error);
-          }
+          // Show fallback content in container
+          container.innerHTML = `
+            <div class="placeholder-text">
+              Failed to load AccendLink SDK.<br>
+              Please check your internet connection and try refreshing the page.
+            </div>
+          `;
         }
       });
     </script>

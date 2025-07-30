@@ -1,30 +1,11 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  Paper,
-  Snackbar,
-  Alert,
-  Typography,
-} from "@mui/material";
 import AccendLink from "./AccendLink";
-import { AccendConfig } from "@accend/link-types";
 
 const App: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
 
   const handleClickOpen = () => {
     console.log("Opening customer account connection dialog");
@@ -40,7 +21,7 @@ const App: React.FC = () => {
     console.log("Customer account connection success handler called");
     // For demo purposes, simulating documents
     setAlertMessage("Documents uploaded successfully!");
-    setAlertSeverity("success");
+    setAlertType("success");
     setAlertOpen(true);
     setOpen(false);
   };
@@ -51,7 +32,7 @@ const App: React.FC = () => {
       error?.message || "Unknown error"
     );
     setAlertMessage("Error: " + (error?.message || "Unknown error"));
-    setAlertSeverity("error");
+    setAlertType("error");
     setAlertOpen(true);
   };
 
@@ -60,7 +41,7 @@ const App: React.FC = () => {
   };
 
   // Define the config for AccendLink
-  const accendConfig: AccendConfig = {
+  const accendConfig = {
     data: {
       // This customer access token should be replaced with the actual customer access token
       // you get from the Accend Link SDK API (likely through your own backend calls.)
@@ -68,131 +49,342 @@ const App: React.FC = () => {
     },
     component: {
       theme: {
-        primary: "#123413",
+        primary: "#2196f3",
       },
     },
   };
 
+  const styles = {
+    body: {
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif',
+      margin: 0,
+      padding: "20px",
+      backgroundColor: "#f5f5f5",
+      color: "#333",
+      minHeight: "100vh",
+    },
+    container: {
+      maxWidth: "960px",
+      margin: "0 auto",
+    },
+    title: {
+      color: "#2196f3",
+      marginBottom: "1rem",
+      fontSize: "2.5rem",
+      fontWeight: "bold",
+    },
+    description: {
+      marginBottom: "2rem",
+      lineHeight: 1.5,
+      fontSize: "16px",
+    },
+    demoSection: {
+      background: "white",
+      borderRadius: "8px",
+      padding: "24px",
+      marginBottom: "24px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    sectionTitle: {
+      color: "#333",
+      marginTop: "2rem",
+      marginBottom: "1rem",
+      fontSize: "1.5rem",
+      fontWeight: "600",
+    },
+    infoBox: {
+      backgroundColor: "#fff3cd",
+      color: "#856404",
+      border: "1px solid #ffeaa7",
+      borderRadius: "4px",
+      padding: "16px",
+      margin: "16px 0",
+    },
+    button: {
+      padding: "12px 24px",
+      backgroundColor: "#2196f3",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+      fontSize: "16px",
+      transition: "background-color 0.2s",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      margin: "0 auto",
+    },
+    modalOverlay: {
+      position: "fixed" as const,
+      inset: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "16px",
+      zIndex: 50,
+    },
+    modal: {
+      background: "white",
+      borderRadius: "8px",
+      maxWidth: "800px",
+      width: "100%",
+      maxHeight: "90vh",
+      overflow: "hidden",
+      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+    },
+    modalHeader: {
+      backgroundColor: "#f8f9fa",
+      padding: "16px 24px",
+      borderBottom: "1px solid #e9ecef",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    modalTitle: {
+      fontSize: "1.125rem",
+      fontWeight: "600",
+      color: "#333",
+    },
+    closeButton: {
+      background: "none",
+      border: "none",
+      color: "#666",
+      cursor: "pointer",
+      padding: "4px",
+      borderRadius: "4px",
+      transition: "color 0.2s",
+    },
+    modalContent: {
+      padding: 0,
+      minHeight: "620px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    modalFooter: {
+      backgroundColor: "#f8f9fa",
+      padding: "16px 24px",
+      borderTop: "1px solid #e9ecef",
+    },
+    cancelButton: {
+      padding: "8px 16px",
+      color: "#666",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      borderRadius: "4px",
+      transition: "color 0.2s",
+    },
+    alert: {
+      position: "fixed" as const,
+      bottom: "16px",
+      right: "16px",
+      zIndex: 50,
+      padding: "16px 24px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      maxWidth: "400px",
+    },
+    alertSuccess: {
+      backgroundColor: "#e8f5e9",
+      color: "#2e7d32",
+      border: "1px solid #4caf50",
+    },
+    alertError: {
+      backgroundColor: "#ffebee",
+      color: "#c62828",
+      border: "1px solid #f44336",
+    },
+  };
+
   return (
-    <Box sx={{ width: "100%", maxWidth: 800, margin: "0 auto", padding: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom color="primary">
-        Accend Link React Wrapper Demo
-      </Typography>
+    <div style={styles.body}>
+      <div style={styles.container}>
+        <h1 style={styles.title}>Accend Link React Wrapper Demo</h1>
 
-      <Typography variant="body1" paragraph>
-        This example demonstrates using the Accend Link SDK with a custom React
-        wrapper. The wrapper is implemented in this application, not in the base
-        library.
-      </Typography>
+        <div style={styles.description}>
+          <p>
+            This example demonstrates how to integrate the Accend Link SDK with
+            React using a custom wrapper component. The wrapper handles SDK
+            initialization, lifecycle management, and provides a clean React
+            API.
+          </p>
+        </div>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Paper
-            sx={{
-              p: 3,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h5" component="h2" gutterBottom>
-              Document Upload Demo
-            </Typography>
-            <Typography variant="body1" paragraph>
+        <div style={styles.infoBox}>
+          <strong>Note:</strong> This demo uses a test customer access token.
+          Replace with your actual token in a production environment.
+        </div>
+
+        <div style={styles.demoSection}>
+          <h2 style={styles.sectionTitle}>Interactive Demo</h2>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ color: "#666", marginBottom: "24px" }}>
               Click the button below to open the Accend Link modal for document
               upload.
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
+            </p>
+            <button
               onClick={handleClickOpen}
-              startIcon={<span className="material-icons">upload_file</span>}
+              style={styles.button}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.backgroundColor = "#1976d2")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.style.backgroundColor = "#2196f3")
+              }
             >
-              Upload Documents
-            </Button>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Modal Dialog */}
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="md"
-        TransitionProps={{
-          timeout: { enter: 300, exit: 200 },
-        }}
-        PaperProps={{
-          sx: {
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            borderRadius: 2,
-            overflow: "hidden",
-          },
-        }}
-      >
-        <DialogTitle sx={{ bgcolor: "#f5f5f5" }}>
-          <div style={{ fontWeight: 500, fontSize: "1.25rem" }}>
-            Upload Documents
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              Connect Accounts
+            </button>
           </div>
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <span className="material-icons">close</span>
-          </IconButton>
-        </DialogTitle>
-        <DialogContent
-          dividers
-          sx={{
-            p: 0,
-            minWidth: "600px",
-            minHeight: "620px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+        </div>
+
+        <div style={styles.demoSection}>
+          <h2 style={styles.sectionTitle}>React Implementation Notes</h2>
+          <div style={{ color: "#666", lineHeight: 1.6 }}>
+            <p>
+              <strong>Custom Wrapper Component:</strong> This example uses a
+              custom React wrapper that handles SDK initialization and lifecycle
+              management within React's component system.
+            </p>
+            <p>
+              <strong>TypeScript Integration:</strong> The wrapper integrates
+              with{" "}
+              <code
+                style={{
+                  backgroundColor: "#f1f1f1",
+                  padding: "2px 6px",
+                  borderRadius: "3px",
+                  fontSize: "14px",
+                  fontFamily: "monospace",
+                }}
+              >
+                @accend/link-types
+              </code>{" "}
+              for full type safety and better development experience.
+            </p>
+            <p>
+              <strong>Modal Integration:</strong> Demonstrates how to integrate
+              AccendLink within modal dialogs for better user experience and
+              state management.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Overlay */}
+      {open && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            {/* Modal Header */}
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Upload Documents</h3>
+              <button
+                onClick={handleClose}
+                style={styles.closeButton}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#333")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#666")}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={styles.modalContent}>
+              {/* For modal environments, a unique key ensures fresh mounting when dialog opens/reopens */}
+              {open && (
+                <AccendLink
+                  config={accendConfig}
+                  onSuccess={handleSuccess}
+                  onFail={handleFail}
+                />
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={styles.modalFooter}>
+              <button
+                onClick={handleClose}
+                style={styles.cancelButton}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#333")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#666")}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Notification */}
+      {alertOpen && (
+        <div
+          style={{
+            ...styles.alert,
+            ...(alertType === "success"
+              ? styles.alertSuccess
+              : styles.alertError),
           }}
         >
-          {/* 
-            For modal environments, a unique key ensures fresh mounting when dialog opens/reopens
-          */}
-          {open && (
-            <AccendLink
-              config={accendConfig}
-              onSuccess={handleSuccess}
-              onFail={handleFail}
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Alert Snackbar */}
-      <Snackbar
-        open={alertOpen}
-        autoHideDuration={6000}
-        onClose={handleAlertClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleAlertClose}
-          severity={alertSeverity}
-          sx={{ width: "100%" }}
-        >
-          {alertMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+          <div style={{ flex: 1 }}>{alertMessage}</div>
+          <button
+            onClick={handleAlertClose}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px",
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 
