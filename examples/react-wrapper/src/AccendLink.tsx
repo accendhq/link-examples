@@ -14,10 +14,16 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
     const target = componentMount;
     if (target && target.children.length === 0) {
       // Initialize AccendLink with the proper options
-      initializeAccendLink({
-        target,
-        props,
-      });
+      initializeAccendLink(
+        {
+          target,
+          props,
+        },
+        {
+          // Specify using the staging environment for testing
+          env: "staging",
+        }
+      );
     }
     // AccendLink does not support changing props after initialisation.
     // eslint-disable-next-line react-hooks/exhaustive-deps

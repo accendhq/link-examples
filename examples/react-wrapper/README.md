@@ -54,6 +54,8 @@ At its center, the `@accend/link-types` library is the core of this implementati
 
 Behind the scenes, `@accend/link-types` dynamically loads the front-end Accend Link JavaScript SDK, ensuring your application only downloads the SDK when it's actually needed. This approach keeps your initial bundle size small while providing seamless integration.
 
+The library supports both production and staging environments, allowing you to easily switch between environments for development and testing purposes.
+
 To integrate this into your React application, you'll need to create a wrapper component (like the `AccendLink` component in this example) within your own React app. This wrapper ensures the SDK is properly initialized within React's component lifecycle and provides a clean, React-friendly API for configuration and event handling.
 
 ### AccendLink Component
@@ -82,10 +84,16 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
   useEffect(() => {
     const target = componentMount;
     if (target && target.children.length === 0) {
-      initializeAccendLink({
-        target,
-        props,
-      });
+      initializeAccendLink(
+        {
+          target,
+          props,
+        },
+        {
+          // Specify using the staging environment for testing
+          env: "staging",
+        }
+      );
     }
     // AccendLink does not support changing props after initialisation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,6 +112,69 @@ const AccendLink: React.FC<AccendLinkProps> = (props) => {
 };
 
 export default AccendLink;
+```
+
+## SDK Environment Configuration
+
+The `@accend/link-types` library supports both production and staging environments through the `sdkConfig` parameter. This allows you to easily switch between environments for development, testing, and production deployment.
+
+### Environment Options
+
+| Environment    | Description                                      | Use Case                              |
+| -------------- | ------------------------------------------------ | ------------------------------------- |
+| `"production"` | Stable, production-ready SDK (default)           | Live applications serving real users  |
+| `"staging"`    | Development/testing version with latest features | Development, testing, and integration |
+
+### Configuring the Environment
+
+You can specify the environment when initializing AccendLink by passing a second parameter to `initializeAccendLink`:
+
+```tsx
+// Using staging environment (for development/testing)
+initializeAccendLink(
+  {
+    target,
+    props,
+  },
+  {
+    env: "staging",
+  }
+);
+
+// Using production environment (default - can be omitted)
+initializeAccendLink(
+  {
+    target,
+    props,
+  },
+  {
+    env: "production",
+  }
+);
+
+// Default behavior (production environment)
+initializeAccendLink({
+  target,
+  props,
+});
+```
+
+### Dynamic Environment Selection
+
+You can also make the environment configurable based on your application's deployment:
+
+```tsx
+const sdkConfig = {
+  env: process.env.NODE_ENV === "production" ? "production" : "staging",
+};
+
+initializeAccendLink(
+  {
+    target,
+    props,
+  },
+  sdkConfig
+);
 ```
 
 ### Example: Using the Component
@@ -199,6 +270,23 @@ The AccendConfig object allows you to customize various aspects of the Accend Li
 | `config`    | AccendConfig | ✓        | Configuration object for the SDK |
 | `onSuccess` | function     | ✗        | Callback when upload succeeds    |
 | `onFail`    | function     | ✗        | Callback when an error occurs    |
+
+### SDK Configuration (initializeAccendLink)
+
+The `initializeAccendLink` function accepts two parameters:
+
+#### First Parameter: Initialization Options
+
+| Property | Type            | Required | Description                                    |
+| -------- | --------------- | -------- | ---------------------------------------------- |
+| `target` | HTMLElement     | ✓        | DOM element where SDK will be rendered         |
+| `props`  | AccendLinkProps | ✓        | Component props including config and callbacks |
+
+#### Second Parameter: SDK Configuration
+
+| Property | Type                          | Required | Default        | Description            |
+| -------- | ----------------------------- | -------- | -------------- | ---------------------- |
+| `env`    | `"production"` \| `"staging"` | ✗        | `"production"` | SDK environment to use |
 
 ## TypeScript Support
 

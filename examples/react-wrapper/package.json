@@ -7,7 +7,7 @@
     "build": "parcel build src/index.html"
   },
   "dependencies": {
-    "@accend/link-types": "^0.1.1",
+    "@accend/link-types": "^0.1.4",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.14.11",
